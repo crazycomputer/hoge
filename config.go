@@ -35,6 +35,7 @@ func (cfg Config) Build(opts ...Option) (*Logger, error) {
 		return nil, err
 	}
 
+
 	sink, errSink, err := cfg.openSinks()
 	if err != nil {
 		return nil, err
