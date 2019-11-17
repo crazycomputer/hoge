@@ -2,6 +2,7 @@ package level
 
 import (
 	"github.com/crazycomputer/hoge/atomic"
+	"strconv"
 )
 
 type Level int8
@@ -20,6 +21,12 @@ const (
 	_minLevel = DebugLevel
 	_maxLevel = ErrorLevel
 )
+
+const TRACE = "TRACE"
+const DEBUG = "DEBUG"
+const INFO = "INFO"
+const WARN = "WARN"
+const ERROR = "ERROR"
 
 type Checker struct {
 	l *atomic.Int32
@@ -55,4 +62,22 @@ func (lvl Level) Enabled(l Level) bool {
 
 type Enabler interface {
 	Enabled(Level) bool
+}
+
+func (lvl Level) String() string {
+	switch lvl {
+	case TraceLevel:
+		return TRACE
+	case DebugLevel:
+		return DEBUG
+	case InfoLevel:
+		return INFO
+	case WarnLevel:
+		return WARN
+	case ErrorLevel:
+		return ERROR
+	default:
+		return "unknown" + strconv.FormatInt(int64(lvl), 10)
+	}
+
 }

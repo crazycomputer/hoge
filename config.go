@@ -3,6 +3,8 @@ package hoge
 import (
 	"github.com/crazycomputer/hoge/level"
 	"go.uber.org/zap/zapcore"
+	"os"
+
 	"time"
 )
 
@@ -22,27 +24,18 @@ type Config struct {
 
 	FlowControl *FlowCtrlCfg `json:"flowControl" yaml:"flowControl"`
 
-	Serializer string `json:"serializer" yaml:"serializer"`
-
-	EncoderConfig zapcore.EncoderConfig `json:"encoderConfig" yaml:"encoderConfig"`
-
 	OutputExporters []ExporterConfig `json:"output" yaml:"output"`
 }
 
 func (cfg Config) Build(opts ...Option) (*Logger, error) {
-	enc, err := cfg.buildEncoder()
-	if err != nil {
-		return nil, err
-	}
-
 
 	sink, errSink, err := cfg.openSinks()
 	if err != nil {
 		return nil, err
 	}
 
-	log := New(
-		zapcore.NewCore(enc, sink, cfg.Level),
+	log := new(
+		newCore(enc, sink, cfg.Level),
 		cfg.buildOptions(errSink)...,
 	)
 	if len(opts) > 0 {
@@ -50,3 +43,19 @@ func (cfg Config) Build(opts ...Option) (*Logger, error) {
 	}
 	return log, nil
 }
+
+
+func new(core zapcore.Core, options ...Option) *Logger {
+	log := &Logger{
+		core:        core,
+		errorOutput: zapcore.Lock(os.Stderr),
+		addStack:    zapcore.FatalLevel + 1,
+	}
+	return log.WithOptions(options...)
+}
+
+type Option interface {
+	apply(*Logger)
+}
+
+type optionFunc func(*Logger)

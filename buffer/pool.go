@@ -22,11 +22,14 @@ package buffer
 
 import "sync"
 
+var (
+	_pool = NewPool()
+	Get   = _pool.Get
+)
 
 type Pool struct {
 	p *sync.Pool
 }
-
 
 func NewPool() Pool {
 	return Pool{p: &sync.Pool{
@@ -35,7 +38,6 @@ func NewPool() Pool {
 		},
 	}}
 }
-
 
 func (p Pool) Get() *Buffer {
 	buf := p.p.Get().(*Buffer)
